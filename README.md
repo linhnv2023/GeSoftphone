@@ -19,7 +19,13 @@
   <img src="https://img.shields.io/badge/PJSIP-2.14.1-orange.svg" alt="PJSIP" />
   <img src="https://img.shields.io/badge/Audio-Opus%20HD%2048kHz-blueviolet.svg" alt="Opus HD" />
   <img src="https://img.shields.io/badge/Platform-macOS%20%7C%20Linux-lightgrey.svg" alt="Platform" />
-  <img src="https://img.shields.io/badge/Release-v3.22.16-success.svg" alt="Version" />
+  <a href="https://github.com/linhnv2023/GeSoftphone/releases/latest"><img src="https://img.shields.io/github/v/release/linhnv2023/GeSoftphone?color=success&label=Latest%20Release" alt="Latest Release" /></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/linhnv2023/GeSoftphone/releases/download/v1.0.0/GESoftphone.dmg">
+    <img src="https://img.shields.io/badge/⬇️_Download-GESoftphone.dmg_(macOS)-2563eb?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS DMG" />
+  </a>
 </p>
 
 ---
