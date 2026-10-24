@@ -1,0 +1,25 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    cmake \
+    pkg-config \
+    qt6-base-dev \
+    qt6-tools-dev \
+    libpjproject-dev \
+    libsqlite3-dev \
+    libsqlitecpp-dev \
+    libasound2-dev \
+    libpulse-dev \
+    libssl-dev \
+    libopus-dev \
+    libopencore-amrnb-dev \
+    libopencore-amrwb-dev \
+    file \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+CMD ["/bin/bash", "-c", "mkdir -p /workspace/build_linux && cd /workspace/build_linux && cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build . --config Release -j$(nproc) && cpack -G DEB && echo 'Build complete! .deb file created in build_linux/'"]

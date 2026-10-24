@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=GeSoftphone
+GenericName=VoIP Softphone
+Comment=Modern cross-platform SIP softphone
+Exec=gesoftphone %u
+Icon=gesoftphone
+Terminal=false
+Categories=Network;Telephony;InstantMessaging;Qt;
+MimeType=x-scheme-handler/sip;x-scheme-handler/sips;x-scheme-handler/tel;
+Keywords=sip;voip;phone;call;softphone;telephony;
+StartupNotify=true
+StartupWMClass=gesoftphone

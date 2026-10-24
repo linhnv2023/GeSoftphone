@@ -1,0 +1,28 @@
+# Build directories
+build/
+build_*/
+build_mac/
+build_linux/
+*.dmg
+*.app
+*.deb
+
+# CMake artifacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+
+# Logs
+*.log
+
+# IDE & OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~

@@ -1,0 +1,25 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource prefix="/icons">
+    <file>res/gesoftphone.ico</file>
+    <file>res/gesoftphone.png</file>
+    <file>res/call_in.ico</file>
+    <file>res/call_out.ico</file>
+    <file>res/call_miss.ico</file>
+    <file>res/button_video.ico</file>
+    <file>res/button_message.ico</file>
+    <file>res/button_speaker.ico</file>
+    <file>res/button_mutein.ico</file>
+    <file>res/button_mutedin.ico</file>
+    <file>res/button_muteout.ico</file>
+    <file>res/button_mutedout.ico</file>
+    <file>res/button_search.ico</file>
+    <file>res/contact.ico</file>
+    <file>res/status_online.ico</file>
+    <file>res/status_offline.ico</file>
+    <file>res/status_away.ico</file>
+    <file>res/status_busy.ico</file>
+    <file>res/status_yellow.ico</file>
+    <file>res/voicemail.bmp</file>
+    <file>res/dropdown.ico</file>
+</qresource>
+</RCC>
