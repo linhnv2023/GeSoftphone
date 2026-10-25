@@ -1538,20 +1538,42 @@ void MainWindow::onAccountBadgeClicked()
     auto accounts = AccountDialog::loadAllAccounts();
     QMenu menu(this);
     menu.setStyleSheet(
-        "QMenu { background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 4px; font-size: 11.5px; }"
-        "QMenu::item { padding: 4px 18px 4px 8px; border-radius: 4px; color: #0F172A; }"
-        "QMenu::item:selected { background: #EFF6FF; color: #1E40AF; }"
+        "QMenu { background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 8px; padding: 5px; font-size: 12px; }"
+        "QMenu::item { padding: 6px 20px 6px 10px; border-radius: 5px; color: #0F172A; font-weight: 500; }"
+        "QMenu::item:selected { background: #EFF6FF; color: #2563EB; font-weight: 600; }"
+        "QMenu::separator { height: 1px; background: #E2E8F0; margin: 4px 2px; }"
     );
 
+    auto* header = menu.addAction("Switch Active Account (1-Click):");
+    header->setEnabled(false);
+    QFont hf = header->font();
+    hf.setBold(true);
+    hf.setPointSize(10);
+    header->setFont(hf);
+    menu.addSeparator();
+
     for (const auto& acc : accounts) {
-        QString title = QString::fromStdString(acc.label.empty() ? acc.username : acc.label);
-        if (title.isEmpty()) title = "Account";
-        if (acc.isActive) {
-            title = "✓  " + title;
+        QString label = QString::fromStdString(acc.label.empty() ? acc.username : acc.label);
+        if (label.isEmpty()) label = "Account";
+
+        QString server = QString::fromStdString(acc.server.empty() ? acc.domain : acc.server);
+        QString displayTitle;
+        if (!server.isEmpty()) {
+            displayTitle = QString("%1  (%2)").arg(label, server);
         } else {
-            title = "    " + title;
+            displayTitle = label;
         }
-        auto* act = menu.addAction(title);
+
+        QIcon itemIcon;
+        if (acc.isActive) {
+            displayTitle = "✓  " + displayTitle;
+            itemIcon = QIcon(":/icons/res/active_green.ico");
+        } else {
+            displayTitle = "    " + displayTitle;
+            itemIcon = QIcon(":/icons/res/active_grey.ico");
+        }
+
+        auto* act = menu.addAction(itemIcon, displayTitle);
         QString accId = QString::fromStdString(acc.id);
         connect(act, &QAction::triggered, this, [this, accId]() {
             switchActiveAccount(accId);
@@ -1559,7 +1581,7 @@ void MainWindow::onAccountBadgeClicked()
     }
 
     menu.addSeparator();
-    auto* manageAct = menu.addAction(QIcon(":/icons/res/contact.ico"), "Manage Accounts...");
+    auto* manageAct = menu.addAction(QIcon(":/icons/res/contact.ico"), "⚙️ Manage Accounts...");
     connect(manageAct, &QAction::triggered, this, &MainWindow::onOpenAccountDialog);
 
     if (m_accountBadge) {

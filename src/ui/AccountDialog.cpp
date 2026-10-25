@@ -120,12 +120,18 @@ void AccountDialog::setupUi()
     connect(m_deleteAccountBtn, &QPushButton::clicked, this, &AccountDialog::onDeleteAccountClicked);
     accRow1->addWidget(m_deleteAccountBtn);
 
-    topCardLayout->addLayout(accRow1);
-
-    m_activeAccountCheck = new QCheckBox("Active Account (Used for making & receiving calls)", this);
-    m_activeAccountCheck->setStyleSheet("QCheckBox { font-weight: 600; color: #059669; }");
+    auto* accRow2 = new QHBoxLayout();
+    m_activeAccountCheck = new QCheckBox("Active Account", this);
+    m_activeAccountCheck->setStyleSheet("QCheckBox { font-weight: 600; color: #0F172A; }");
     connect(m_activeAccountCheck, &QCheckBox::toggled, this, &AccountDialog::onToggleActiveAccount);
-    topCardLayout->addWidget(m_activeAccountCheck);
+    accRow2->addWidget(m_activeAccountCheck);
+    accRow2->addStretch();
+
+    m_activateNowBtn = new QPushButton("⚡ Activate (Use this Account)", this);
+    m_activateNowBtn->setToolTip("Click to instantly make this account active and connect");
+    connect(m_activateNowBtn, &QPushButton::clicked, this, &AccountDialog::onActivateNowClicked);
+    accRow2->addWidget(m_activateNowBtn);
+    topCardLayout->addLayout(accRow2);
 
     mainLayout->addWidget(topAccountCard);
 
@@ -383,6 +389,7 @@ void AccountDialog::displayAccount(const SipAccountConfig& cfg)
     m_disableSessionTimersCheck->setChecked(cfg.disableSessionTimers);
 
     m_activeAccountCheck->setChecked(cfg.isActive);
+    updateActiveButtonState();
 }
 
 void AccountDialog::updatePasswordDisplayState()
@@ -414,6 +421,32 @@ void AccountDialog::updatePasswordDisplayState()
             m_passwordEdit->setEchoMode(QLineEdit::Password);
             m_displayPassLink->setText("<a href='#' style='color: #2563EB; font-size: 11px; text-decoration: underline;'>Display password</a>");
         }
+    }
+}
+
+void AccountDialog::updateActiveButtonState()
+{
+    if (!m_activateNowBtn) return;
+    bool isActive = m_activeAccountCheck ? m_activeAccountCheck->isChecked() : false;
+    if (isActive) {
+        m_activateNowBtn->setText("✓ Currently Active");
+        m_activateNowBtn->setStyleSheet(
+            "QPushButton { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; "
+            "font-weight: 700; border-radius: 5px; padding: 4px 12px; font-size: 11px; }"
+        );
+        m_activateNowBtn->setEnabled(false);
+        m_activateNowBtn->setToolTip("This account is currently active for calling.");
+    } else {
+        m_activateNowBtn->setText("⚡ Activate (Use this Account)");
+        m_activateNowBtn->setStyleSheet(
+            "QPushButton { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2563EB, stop:1 #3B82F6); "
+            "color: #FFFFFF; border: none; font-weight: 700; border-radius: 5px; padding: 4px 14px; font-size: 11px; } "
+            "QPushButton:hover { background: #1D4ED8; } "
+            "QPushButton:pressed { background: #1E40AF; }"
+        );
+        m_activateNowBtn->setEnabled(true);
+        m_activateNowBtn->setCursor(Qt::PointingHandCursor);
+        m_activateNowBtn->setToolTip("Click to instantly make this account active and connect");
     }
 }
 
@@ -551,6 +584,55 @@ void AccountDialog::onToggleActiveAccount(bool checked)
         m_accountCombo->setItemText(static_cast<int>(i), title);
     }
     m_isUpdatingUI = false;
+    updateActiveButtonState();
+}
+
+void AccountDialog::onActivateNowClicked()
+{
+    if (m_currentIndex < 0 || m_currentIndex >= static_cast<int>(m_accounts.size())) return;
+
+    // Save current form into m_accounts[m_currentIndex]
+    m_accounts[m_currentIndex] = readFormIntoConfig();
+
+    // Validate current account
+    if (m_accounts[m_currentIndex].username.empty()) {
+        QMessageBox::warning(this, "Validation Error", "Username is required.");
+        m_usernameEdit->setFocus();
+        return;
+    }
+    if (m_accounts[m_currentIndex].server.empty() && m_accounts[m_currentIndex].domain.empty()) {
+        QMessageBox::warning(this, "Validation Error", "SIP Server or Domain is required.");
+        m_serverEdit->setFocus();
+        return;
+    }
+
+    QString srv = QString::fromStdString(m_accounts[m_currentIndex].server);
+    QString dom = QString::fromStdString(m_accounts[m_currentIndex].domain);
+    QString prx = QString::fromStdString(m_accounts[m_currentIndex].proxy);
+    if (srv.contains('@') || dom.contains('@') || prx.contains('@')) {
+        QMessageBox::warning(this, "Validation Error",
+            "SIP Server, Domain, and Proxy must NOT contain the '@' symbol.\n\n"
+            "If you entered an address with '@' (e.g. 'hmpbx@hocmai.vn:25060'), please change it to use a dot '.' (e.g. 'hmpbx.hocmai.vn:25060').");
+        if (srv.contains('@')) m_serverEdit->setFocus();
+        else if (dom.contains('@')) m_domainEdit->setFocus();
+        else m_proxyEdit->setFocus();
+        return;
+    }
+
+    // Set this account as active, deactivate all others
+    for (size_t i = 0; i < m_accounts.size(); ++i) {
+        m_accounts[i].isActive = (static_cast<int>(i) == m_currentIndex);
+        m_accounts[i].isSaved = true;
+        if (!m_accounts[i].password.empty()) {
+            m_diskPasswords[m_accounts[i].id] = m_accounts[i].password;
+        }
+    }
+
+    // Save all accounts to disk immediately
+    saveAllAccounts(m_accounts);
+
+    // Close dialog with Accepted to trigger instant registration in MainWindow!
+    accept();
 }
 
 void AccountDialog::onTogglePasswordDisplay()

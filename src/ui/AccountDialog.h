@@ -36,6 +36,7 @@ private slots:
     void onNewAccountClicked();
     void onDeleteAccountClicked();
     void onToggleActiveAccount(bool checked);
+    void onActivateNowClicked();
     void onSaveClicked();
     void onTogglePasswordDisplay();
 
@@ -45,6 +46,7 @@ private:
     void refreshAccountSelector(const std::string& selectId = "");
     void displayAccount(const SipAccountConfig& cfg);
     void updatePasswordDisplayState();
+    void updateActiveButtonState();
     SipAccountConfig readFormIntoConfig() const;
 
     SipEngine* m_engine = nullptr;
@@ -60,6 +62,7 @@ private:
     QPushButton* m_newAccountBtn = nullptr;
     QPushButton* m_deleteAccountBtn = nullptr;
     QCheckBox* m_activeAccountCheck = nullptr;
+    QPushButton* m_activateNowBtn = nullptr;
 
     // Form fields
     QLineEdit* m_accountNameEdit = nullptr;
