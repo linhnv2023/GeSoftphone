@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-  <b>Modern, High-Performance Cross-Platform Enterprise VoIP SIP Client</b><br>
-  Designed for macOS and Linux • Built with C++20, Qt 6, PJSIP 2.14.1 & SQLite 3
+  <b>Cross-Platform VoIP SIP Client for macOS and Linux</b><br>
+  Built with C++20, Qt 6, PJSIP 2.14.1 & SQLite 3
 </p>
 
 <p align="center">
@@ -34,41 +34,36 @@
 
 ---
 
-## 📌 Overview
+## 📌 Giới thiệu (Overview)
 
-**GeSoftphone** is a modern, ultra-compact, enterprise-grade desktop VoIP softphone engineered for macOS and Linux. Building upon the proven lightweight concepts of MicroSIP, GeSoftphone has been completely re-architected and modernized from the ground up with C++20, Qt 6, and PJSIP 2.14.1. Combining studio-grade wideband audio algorithms with Apple Human Interface (HIG) ergonomics, it provides lightning-fast call handling, multi-account registration, and rock-solid network resilience for businesses, call centers, and power users.
+**GeSoftphone** là phần mềm gọi thoại qua giao thức SIP (VoIP client) dành cho hệ điều hành macOS và Linux. Ứng dụng được xây dựng trên nền tảng C++20 và framework Qt 6, sử dụng thư viện PJSIP 2.14.1 để xử lý giao thức SIP và luồng âm thanh RTP.
+
+Dự án cung cấp các chức năng chính:
+- **Xử lý cuộc gọi thoại**: Kết nối và đăng ký tới các tổng đài PBX (Asterisk, FreePBX, Kamailio, v.v.), hỗ trợ các chuẩn nén âm thanh Opus (48kHz), G.711a (PCMA), G.711u (PCMU) và G.722.
+- **Quản lý tài khoản SIP**: Hỗ trợ lưu trữ nhiều tài khoản SIP; cho phép chuyển đổi nhanh tài khoản hoạt động hoặc chuyển sang trạng thái ngắt kết nối (Offline) bằng 1 cú nhấp chuột.
+- **Bàn phím & Điều khiển âm thanh**: Bàn phím số đầy đủ, thanh điều chỉnh âm lượng microphone/loa và hiển thị mức tín hiệu âm thanh (VU meter) thời gian thực.
+- **Lưu trữ dữ liệu**: Quản lý lịch sử cuộc gọi và danh bạ lưu trữ cục bộ qua cơ sở dữ liệu SQLite 3.
+- **Tương thích hệ điều hành**: Chạy trên macOS (Sonoma, Sequoia) và Linux (Ubuntu 22.04 trở lên).
 
 ---
 
-## ✨ Key Features
+## 📋 Chức năng & Thông số kỹ thuật (Specifications)
 
-### 🎧 Audio & Telephony Engine
-- **Opus HD 48kHz Fullband**: Native 48kHz studio audio without downsampling or conversion distortion.
-- **Adaptive Jitter Buffer**: Dynamic 40–350ms prefetch buffer preventing robot-voice and audio dropouts across Wi-Fi/4G.
-- **Hardware DSP Integration**: Multi-band Acoustic Echo Cancellation (AEC) and Voice Activity Detection (VAD).
-- **Comprehensive Codec Support**: Opus (48kHz), G.711a (PCMA - 8kHz), G.711u (PCMU - 8kHz), and G.722 (16kHz).
-- **Real-time Live Audio VU Meters**: Dual input/output VU meters for real-time visual signal telemetry during calls.
-- **Asynchronous Ringtone Engine**: Multi-threaded audio playback (`afplay` on macOS, `paplay`/`canberra` on Linux) guaranteeing zero audio stream collisions with the SIP CoreAudio engine.
+### 1. Xử lý âm thanh & Cuộc gọi (Audio & Calls)
+- **Audio Codecs**: Opus (48kHz fullband), G.711a/u (8kHz) và G.722 (16kHz).
+- **Jitter Buffer**: Sử dụng adaptive jitter buffer tích hợp của PJSIP (40–350ms) để ổn định luồng âm thanh trên mạng độ trễ biến động.
+- **Xử lý âm thanh**: Tích hợp Acoustic Echo Cancellation (AEC) và Voice Activity Detection (VAD).
+- **Phát chuông**: Phát chuông cuộc gọi độc lập qua tiến trình riêng (`afplay` trên macOS, `paplay`/`canberra` trên Linux) để tránh xung đột với luồng CoreAudio/PulseAudio.
 
-### 👥 Advanced Multi-Account Management
-- **Multiple SIP Accounts**: Store and manage unlimited SIP accounts simultaneously.
-- **1-Click Active Switching**: Instantly switch the active calling account from the status bar badge or main menu without restarting.
-- **Granular Account Settings**: Custom SIP Proxy with RFC 3261 loose routing (`lr`), Keep-Alive (UDP/TCP/TLS), and Register Refresh timeouts.
-- **Strict Password Protection**:
-  - Saved accounts automatically mask and protect passwords (`🔒 Password saved & protected`).
-  - Plain-text verification is only available during new account creation or when typing an uncommitted password replacement.
+### 2. Quản lý tài khoản SIP (Account Management)
+- **Đa tài khoản**: Cấu hình và lưu trữ danh sách tài khoản SIP trên máy.
+- **Chuyển đổi trạng thái**: Chuyển đổi tài khoản gọi hoặc ngắt kết nối (Offline) trực tiếp từ thanh trạng thái hoặc menu.
+- **Tùy chỉnh mạng SIP**: Hỗ trợ chỉ định SIP Server, Domain, Outbound Proxy (RFC 3261 loose routing), Keep-Alive (UDP/TCP/TLS) và chu kỳ Register Refresh.
+- **Bảo mật mật khẩu**: Mật khẩu đã lưu được ẩn trên giao diện; chỉ hiển thị khi nhập mới hoặc khi người dùng chủ động sửa.
 
-### 🛡️ Enterprise Networking & Security
-- **SRTP Media Encryption**: Optional or Mandatory end-to-end media encryption via Secure Real-time Transport Protocol.
-- **SIP Transports**: Dual UDP and TCP support with RFC 3261 loose-routing traversal and automatic MTU packet protection.
-- **NAT Traversal**: Built-in STUN client, ICE support, and dynamic Via/Contact rport rewriting.
-- **Live Status Telemetry**: Instant display of SIP response codes (e.g. `401 Unauthorized`, `403 Forbidden`, `408 Request Timeout`) in the status bar and tooltip.
-- **Active Call Guard**: Prevents accidental account switching or disruption while a live conversation is underway.
-
-### ⚡ Data Persistence & Performance
-- **Zero-Latency SQLite Database**: Uses SQLite 3 in Write-Ahead Logging (`WAL`) mode with `NORMAL` synchronous commits.
-- **Indexed Search**: Real-time auto-completion across call history and contact book.
-- **Smart Pruning**: Automatic history maintenance capped at 1,000 entries to maintain a minimal memory footprint.
+### 3. Lưu trữ dữ liệu (Data Persistence)
+- **Cơ sở dữ liệu cục bộ**: Dùng SQLite 3 với chế độ Write-Ahead Logging (`WAL`) để lưu lịch sử cuộc gọi và danh bạ.
+- **Giới hạn lưu trữ**: Duy trì tối đa 1.000 bản ghi lịch sử gần nhất để tiết kiệm bộ nhớ.
 
 ---
 
@@ -220,5 +215,5 @@ Compile and package:
 
 - **Developer**: **linhnv2**
 - **Project**: **GeSoftphone**
-- **Heritage**: Inherits core architectural ideas from MicroSIP, completely reimagined for modern cross-platform environments.
+- **Tham khảo**: Thiết kế dựa trên mô hình hoạt động của MicroSIP, được phát triển lại bằng C++20 và Qt 6 cho macOS và Linux.
 - **Copyright**: © 2026 GeSoftphone. All rights reserved.

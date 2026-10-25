@@ -98,8 +98,8 @@ void AboutDialog::setupUi()
     cardLayout->setSpacing(8);
 
     auto* descLabel = new QLabel(
-        tr("A modern, high-performance cross-platform enterprise VoIP softphone for macOS and Linux.\n\n"
-           "Engineered with studio-grade wideband audio, adaptive jitter buffers, and modern Apple Human Interface guidelines."),
+        tr("Cross-platform SIP VoIP softphone for macOS and Linux.\n\n"
+           "Built with C++20 and Qt 6, using PJSIP 2.14.1 for SIP signaling and RTP media streaming. Features audio calling with Opus, G.711, and G.722 codecs, multi-account management, and local SQLite data storage."),
         this
     );
     descLabel->setWordWrap(true);
