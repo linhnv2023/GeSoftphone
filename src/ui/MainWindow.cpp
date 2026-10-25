@@ -921,8 +921,13 @@ void MainWindow::autoRegister()
     if (!cfg.username.empty() && !cfg.server.empty()) {
         if (m_statusIcon) m_statusIcon->setPixmap(QIcon(":/icons/res/status_yellow.ico").pixmap(14, 14));
         m_statusText->setText("Connecting...");
+        m_statusText->setToolTip("Connecting to SIP Server...");
         updateAccountBadge();
-        m_sipEngine.registerAccount(cfg);
+        if (!m_sipEngine.registerAccount(cfg)) {
+            if (m_statusIcon) m_statusIcon->setPixmap(QIcon(":/icons/res/status_offline.ico").pixmap(14, 14));
+            m_statusText->setText("Config Error");
+            m_statusText->setToolTip("Failed to register account: Invalid SIP URI or Server address.");
+        }
     } else {
         if (m_statusIcon) m_statusIcon->setPixmap(QIcon(":/icons/res/status_offline.ico").pixmap(14, 14));
         m_statusText->setText("Offline");

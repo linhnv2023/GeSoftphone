@@ -321,8 +321,27 @@ bool SipEngine::registerAccount(const SipAccountConfig& config)
     pjsua_acc_config acc_cfg;
     pjsua_acc_config_default(&acc_cfg);
 
-    std::string domain = !config.domain.empty() ? config.domain : config.server;
-    std::string server = !config.server.empty() ? config.server : config.domain;
+    auto sanitizeHost = [](std::string host, const std::string& user) -> std::string {
+        // Remove sip: or sips: prefix if user entered it
+        if (host.find("sip:") == 0) host = host.substr(4);
+        else if (host.find("sips:") == 0) host = host.substr(5);
+
+        if (host.find('@') != std::string::npos) {
+            size_t atPos = host.find('@');
+            std::string prefix = host.substr(0, atPos);
+            if (prefix == user) {
+                // User entered "username@host" into the field
+                host = host.substr(atPos + 1);
+            } else {
+                // User typed '@' instead of '.' (e.g. "hmpbx@hocmai.vn")
+                std::replace(host.begin(), host.end(), '@', '.');
+            }
+        }
+        return host;
+    };
+
+    std::string domain = sanitizeHost(!config.domain.empty() ? config.domain : config.server, config.username);
+    std::string server = sanitizeHost(!config.server.empty() ? config.server : config.domain, config.username);
 
     std::string idUri;
     if (!config.displayName.empty()) {
@@ -344,7 +363,7 @@ bool SipEngine::registerAccount(const SipAccountConfig& config)
 
     std::string proxyUri;
     if (!config.proxy.empty()) {
-        proxyUri = config.proxy;
+        proxyUri = sanitizeHost(config.proxy, config.username);
         if (proxyUri.find("sip:") != 0 && proxyUri.find("sips:") != 0) {
             proxyUri = "sip:" + proxyUri;
         }

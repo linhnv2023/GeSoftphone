@@ -141,6 +141,8 @@ target_link_libraries(gesoftphone PRIVATE
 
 if(APPLE)
     target_link_libraries(gesoftphone PRIVATE
+        opencore-amrnb
+        opencore-amrwb
         "-framework CoreAudio"
         "-framework CoreServices"
         "-framework AudioUnit"

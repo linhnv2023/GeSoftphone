@@ -591,6 +591,19 @@ void AccountDialog::onSaveClicked()
             m_serverEdit->setFocus();
             return;
         }
+
+        QString srv = QString::fromStdString(m_accounts[m_currentIndex].server);
+        QString dom = QString::fromStdString(m_accounts[m_currentIndex].domain);
+        QString prx = QString::fromStdString(m_accounts[m_currentIndex].proxy);
+        if (srv.contains('@') || dom.contains('@') || prx.contains('@')) {
+            QMessageBox::warning(this, "Validation Error",
+                "SIP Server, Domain, and Proxy must NOT contain the '@' symbol.\n\n"
+                "If you entered an address with '@' (e.g. 'hmpbx@hocmai.vn:25060'), please change it to use a dot '.' (e.g. 'hmpbx.hocmai.vn:25060').");
+            if (srv.contains('@')) m_serverEdit->setFocus();
+            else if (dom.contains('@')) m_domainEdit->setFocus();
+            else m_proxyEdit->setFocus();
+            return;
+        }
     }
 
     // Clean up completely blank accounts that were never configured
