@@ -20,6 +20,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Gui Widgets)
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
     pkg_check_modules(PJSIP libpjproject)
+    if(PJSIP_FOUND AND PJSIP_STATIC_LIBRARIES)
+        set(PJSIP_LIBRARIES ${PJSIP_STATIC_LIBRARIES})
+    endif()
 endif()
 
 # Fallback paths for PJSIP if pkg-config not used
@@ -127,13 +130,12 @@ target_link_libraries(gesoftphone PRIVATE
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     ${PJSIP_LIBRARIES}
-    SQLite::SQLite3
     ${SQLITECPP_LIBRARY}
+    SQLite::SQLite3
+    sqlite3
     ssl
     crypto
     opus
-    opencore-amrnb
-    opencore-amrwb
 )
 
 
@@ -172,6 +174,9 @@ if(UNIX AND NOT APPLE)
     target_link_libraries(gesoftphone PRIVATE
         pthread
         asound
+        uuid
+        m
+        rt
     )
 
     install(TARGETS gesoftphone DESTINATION bin)
@@ -182,13 +187,13 @@ endif()
 # CPack configuration for Debian / Ubuntu .deb package
 set(CPACK_PACKAGE_NAME "gesoftphone")
 set(CPACK_PACKAGE_VENDOR "GeSoftphone")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GeSoftphone - Modern VoIP SIP Client")
-set(CPACK_PACKAGE_VERSION "3.22.16")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GeSoftphone - Modern Cross-Platform VoIP SIP Client")
+set(CPACK_PACKAGE_VERSION "1.0.0")
 set(CPACK_GENERATOR "DEB")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "GeSoftphone Team <support@ge.softphone>")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "linhnv2 <linhnv2023@github.com>")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libqt6core6, libqt6gui6, libqt6widgets6, libpjproject2 | libpjproject-dev, libsqlite3-0, libasound2")
 set(CPACK_DEBIAN_PACKAGE_SECTION "net")
-set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/ge-softphone")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/linhnv2023/GeSoftphone")
 include(CPack)
 
 

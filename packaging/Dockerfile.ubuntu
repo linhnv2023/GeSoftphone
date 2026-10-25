@@ -2,24 +2,43 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
+# Configure reliable apt download settings
+RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries && \
+    echo 'Acquire::http::Pipeline-Depth "0";' >> /etc/apt/apt.conf.d/80-retries && \
+    echo 'Acquire::http::No-Cache "true";' >> /etc/apt/apt.conf.d/80-retries
+
+RUN apt-get update --fix-missing && apt-get install --fix-missing -y \
     build-essential \
     cmake \
     pkg-config \
+    git \
     qt6-base-dev \
-    qt6-tools-dev \
-    libpjproject-dev \
+    libgl-dev \
     libsqlite3-dev \
-    libsqlitecpp-dev \
     libasound2-dev \
     libpulse-dev \
     libssl-dev \
     libopus-dev \
-    libopencore-amrnb-dev \
-    libopencore-amrwb-dev \
+    dpkg-dev \
     file \
     && rm -rf /var/lib/apt/lists/*
 
+# Build and install SQLiteCpp
+RUN git clone --depth 1 https://github.com/SRombauts/SQLiteCpp.git /tmp/SQLiteCpp && \
+    cd /tmp/SQLiteCpp && mkdir build && cd build && \
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DSQLITECPP_RUN_CPPLINT=OFF -DCMAKE_INSTALL_PREFIX=/usr/local && \
+    cmake --build . -j$(nproc) && cmake --install . && \
+    rm -rf /tmp/SQLiteCpp
+
+# Build and install PJSIP 2.14.1
+RUN git clone --depth 1 --branch 2.14.1 https://github.com/pjsip/pjproject.git /tmp/pjsip && \
+    cd /tmp/pjsip && \
+    ./configure --disable-video --enable-sound --disable-speex-aec --prefix=/usr/local && \
+    make dep && \
+    make -j$(nproc) && \
+    make install && \
+    rm -rf /tmp/pjsip
+
 WORKDIR /workspace
 
-CMD ["/bin/bash", "-c", "mkdir -p /workspace/build_linux && cd /workspace/build_linux && cmake .. -DCMAKE_BUILD_TYPE=Release && cmake --build . --config Release -j$(nproc) && cpack -G DEB && echo 'Build complete! .deb file created in build_linux/'"]
+CMD ["/bin/bash", "-c", "mkdir -p /workspace/build_linux && cd /workspace/build_linux && cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local && cmake --build . --config Release -j$(nproc) && cpack -G DEB && echo 'Build complete! .deb file created in build_linux/'"]

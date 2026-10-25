@@ -22,9 +22,7 @@ if command -v apt-get &> /dev/null; then
         libasound2-dev \
         libpulse-dev \
         libssl-dev \
-        libopus-dev \
-        libopencore-amrnb-dev \
-        libopencore-amrwb-dev
+        libopus-dev
 fi
 
 BUILD_DIR="${ROOT_DIR}/build_linux"
