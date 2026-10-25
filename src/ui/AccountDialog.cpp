@@ -119,6 +119,7 @@ void AccountDialog::setupUi()
     m_deleteAccountBtn->setStyleSheet("QPushButton { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; font-weight: 700; padding: 3px 8px; } QPushButton:hover { background: #FEE2E2; }");
     connect(m_deleteAccountBtn, &QPushButton::clicked, this, &AccountDialog::onDeleteAccountClicked);
     accRow1->addWidget(m_deleteAccountBtn);
+    topCardLayout->addLayout(accRow1);
 
     auto* accRow2 = new QHBoxLayout();
     m_activeAccountCheck = new QCheckBox("Active Account", this);
@@ -429,18 +430,21 @@ void AccountDialog::updateActiveButtonState()
     if (!m_activateNowBtn) return;
     bool isActive = m_activeAccountCheck ? m_activeAccountCheck->isChecked() : false;
     if (isActive) {
-        m_activateNowBtn->setText("✓ Currently Active");
+        m_activateNowBtn->setText("⏸ Deactivate (Go Offline)");
         m_activateNowBtn->setStyleSheet(
-            "QPushButton { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; "
-            "font-weight: 700; border-radius: 5px; padding: 4px 12px; font-size: 11px; }"
+            "QPushButton { background: #FEF2F2; color: #DC2626; border: 1.2px solid #FECACA; "
+            "font-weight: 700; border-radius: 6px; padding: 4px 14px; font-size: 11px; } "
+            "QPushButton:hover { background: #FEE2E2; border-color: #F87171; } "
+            "QPushButton:pressed { background: #FECACA; }"
         );
-        m_activateNowBtn->setEnabled(false);
-        m_activateNowBtn->setToolTip("This account is currently active for calling.");
+        m_activateNowBtn->setEnabled(true);
+        m_activateNowBtn->setCursor(Qt::PointingHandCursor);
+        m_activateNowBtn->setToolTip("Click to disconnect and deactivate this account (go offline)");
     } else {
         m_activateNowBtn->setText("⚡ Activate (Use this Account)");
         m_activateNowBtn->setStyleSheet(
             "QPushButton { background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #2563EB, stop:1 #3B82F6); "
-            "color: #FFFFFF; border: none; font-weight: 700; border-radius: 5px; padding: 4px 14px; font-size: 11px; } "
+            "color: #FFFFFF; border: none; font-weight: 700; border-radius: 6px; padding: 4px 14px; font-size: 11px; } "
             "QPushButton:hover { background: #1D4ED8; } "
             "QPushButton:pressed { background: #1E40AF; }"
         );
@@ -594,6 +598,19 @@ void AccountDialog::onActivateNowClicked()
     // Save current form into m_accounts[m_currentIndex]
     m_accounts[m_currentIndex] = readFormIntoConfig();
 
+    // 1. If currently active -> Deactivate / Disconnect (Go Offline)
+    if (m_accounts[m_currentIndex].isActive) {
+        m_accounts[m_currentIndex].isActive = false;
+        m_accounts[m_currentIndex].isSaved = true;
+        if (!m_accounts[m_currentIndex].password.empty()) {
+            m_diskPasswords[m_accounts[m_currentIndex].id] = m_accounts[m_currentIndex].password;
+        }
+        saveAllAccounts(m_accounts);
+        accept(); // Triggers autoRegister in MainWindow which will unregister SIP and go Offline
+        return;
+    }
+
+    // 2. If not active -> Activate this account
     // Validate current account
     if (m_accounts[m_currentIndex].username.empty()) {
         QMessageBox::warning(this, "Validation Error", "Username is required.");
@@ -700,15 +717,7 @@ void AccountDialog::onSaveClicked()
         cleanedAccounts = m_accounts;
     }
 
-    // Ensure at least one account is marked active
-    bool hasActive = false;
-    for (const auto& acc : cleanedAccounts) {
-        if (acc.isActive) { hasActive = true; break; }
-    }
-    if (!hasActive && !cleanedAccounts.empty()) {
-        cleanedAccounts.front().isActive = true;
-    }
-
+    // Mark all accounts saved and preserve user's active/inactive choice
     for (auto& acc : cleanedAccounts) {
         acc.isSaved = true;
         if (!acc.password.empty()) {
@@ -861,8 +870,8 @@ SipAccountConfig AccountDialog::getActiveAccount()
     for (const auto& a : accounts) {
         if (a.isActive) return a;
     }
-    if (!accounts.empty()) return accounts.front();
-    return loadConfig();
+    // No account is marked active -> return empty config (Offline)
+    return SipAccountConfig();
 }
 
 bool AccountDialog::setActiveAccount(const std::string& accountId)
@@ -870,14 +879,15 @@ bool AccountDialog::setActiveAccount(const std::string& accountId)
     auto accounts = loadAllAccounts();
     bool found = false;
     for (auto& a : accounts) {
-        if (a.id == accountId) {
+        if (!accountId.empty() && a.id == accountId) {
             a.isActive = true;
             found = true;
         } else {
             a.isActive = false;
         }
     }
-    if (found) {
+    // If accountId is empty, it means deactivate all (Go Offline)
+    if (found || accountId.empty()) {
         saveAllAccounts(accounts);
     }
     return found;

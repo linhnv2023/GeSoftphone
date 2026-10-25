@@ -929,9 +929,11 @@ void MainWindow::autoRegister()
             m_statusText->setToolTip("Failed to register account: Invalid SIP URI or Server address.");
         }
     } else {
+        m_sipEngine.unregisterAccount();
         if (m_statusIcon) m_statusIcon->setPixmap(QIcon(":/icons/res/status_offline.ico").pixmap(14, 14));
         m_statusText->setText("Offline");
-        if (m_accountBadge) m_accountBadge->setText("not configured ▾");
+        m_statusText->setToolTip("No account active. Click badge to activate an account.");
+        updateAccountBadge();
     }
     updateMainMenuAccounts();
 }
@@ -1512,7 +1514,6 @@ void MainWindow::onOpenAccountDialog()
 
 void MainWindow::switchActiveAccount(const QString& accountId)
 {
-    if (accountId.isEmpty()) return;
     if (m_activeCallId != -1) {
         QMessageBox::warning(this, "Active Call", "Please end the active call before switching accounts.");
         return;
@@ -1524,12 +1525,17 @@ void MainWindow::switchActiveAccount(const QString& accountId)
 void MainWindow::updateAccountBadge()
 {
     if (!m_accountBadge) return;
+    auto accounts = AccountDialog::loadAllAccounts();
+    if (accounts.empty()) {
+        m_accountBadge->setText("not configured ▾");
+        return;
+    }
     SipAccountConfig cfg = AccountDialog::getActiveAccount();
-    if (!cfg.username.empty()) {
+    if (!cfg.username.empty() && cfg.isActive) {
         QString label = QString::fromStdString(cfg.label.empty() ? cfg.username : cfg.label);
         m_accountBadge->setText(QString("%1 ▾").arg(label));
     } else {
-        m_accountBadge->setText("not configured ▾");
+        m_accountBadge->setText("Offline ▾");
     }
 }
 
@@ -1579,6 +1585,13 @@ void MainWindow::onAccountBadgeClicked()
             switchActiveAccount(accId);
         });
     }
+
+    menu.addSeparator();
+    auto* offlineAct = menu.addAction(QIcon(":/icons/res/status_offline.ico"), "⏸ Disconnect / Go Offline");
+    offlineAct->setToolTip("Deactivate current account and go offline");
+    connect(offlineAct, &QAction::triggered, this, [this]() {
+        switchActiveAccount("");
+    });
 
     menu.addSeparator();
     auto* manageAct = menu.addAction(QIcon(":/icons/res/contact.ico"), "⚙️ Manage Accounts...");
