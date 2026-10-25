@@ -803,7 +803,12 @@ std::vector<SipAccountConfig> AccountDialog::loadAllAccounts()
         cfg.disableSessionTimers = s.value(prefix + "disable_session_timers", false).toBool();
         cfg.isSaved = true;
 
-        cfg.isActive = (!activeId.isEmpty() && cfg.id == activeId.toStdString()) || (activeId.isEmpty() && i == 0);
+        if (s.contains("accounts/active_id")) {
+            cfg.isActive = (!activeId.isEmpty() && activeId != "__none__" && cfg.id == activeId.toStdString());
+        } else {
+            // First time migration: default account 0 to active
+            cfg.isActive = (i == 0);
+        }
         list.push_back(cfg);
     }
 
@@ -815,11 +820,11 @@ void AccountDialog::saveAllAccounts(const std::vector<SipAccountConfig>& account
     QSettings s;
     s.remove("accounts");
     s.setValue("accounts/size", static_cast<int>(accounts.size()));
-    std::string activeId;
+    std::string activeId = "__none__";
 
     for (size_t i = 0; i < accounts.size(); ++i) {
         const auto& cfg = accounts[i];
-        if (cfg.isActive || (activeId.empty() && i == accounts.size() - 1)) {
+        if (cfg.isActive) {
             activeId = cfg.id;
         }
         QString prefix = QString("accounts/%1/").arg(i);
@@ -848,8 +853,10 @@ void AccountDialog::saveAllAccounts(const std::vector<SipAccountConfig>& account
     s.setValue("accounts/active_id", QString::fromStdString(activeId));
 
     // Also sync the active account to legacy sip/* keys for backward compatibility
+    bool hasActive = false;
     for (const auto& a : accounts) {
         if (a.isActive) {
+            hasActive = true;
             s.setValue("sip/server", QString::fromStdString(a.server));
             s.setValue("sip/username", QString::fromStdString(a.username));
             s.setValue("sip/password", QString::fromStdString(a.password));
@@ -861,6 +868,12 @@ void AccountDialog::saveAllAccounts(const std::vector<SipAccountConfig>& account
             s.setValue("sip/account_name", QString::fromStdString(a.label));
             break;
         }
+    }
+    if (!hasActive) {
+        s.setValue("sip/server", "");
+        s.setValue("sip/username", "");
+        s.setValue("sip/password", "");
+        s.setValue("sip/account_name", "");
     }
 }
 

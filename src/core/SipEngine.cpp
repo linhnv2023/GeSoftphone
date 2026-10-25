@@ -438,6 +438,12 @@ void SipEngine::unregisterAccount()
         m_impl->accId = PJSUA_INVALID_ID;
     }
     m_impl->currentConfig = SipAccountConfig();
+    std::lock_guard<std::mutex> lock(g_listenerMutex);
+    if (g_listener) {
+        try {
+            g_listener->onRegistrationStateChanged(REG_STATE_UNREGISTERED, 0, "Unregistered");
+        } catch (...) {}
+    }
 }
 
 int SipEngine::makeCall(const std::string& destination, bool hasVideo)

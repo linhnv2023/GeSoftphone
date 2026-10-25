@@ -918,7 +918,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::autoRegister()
 {
     SipAccountConfig cfg = AccountDialog::getActiveAccount();
-    if (!cfg.username.empty() && !cfg.server.empty()) {
+    if (!cfg.username.empty() && !cfg.server.empty() && cfg.isActive) {
         if (m_statusIcon) m_statusIcon->setPixmap(QIcon(":/icons/res/status_yellow.ico").pixmap(14, 14));
         m_statusText->setText("Connecting...");
         m_statusText->setToolTip("Connecting to SIP Server...");
@@ -1620,6 +1620,12 @@ void MainWindow::updateMainMenuAccounts()
             switchActiveAccount(accId);
         });
     }
+
+    m_accountsMenu->addSeparator();
+    auto* offlineAct = m_accountsMenu->addAction("⏸ Disconnect / Go Offline");
+    connect(offlineAct, &QAction::triggered, this, [this]() {
+        switchActiveAccount("");
+    });
 
     m_accountsMenu->addSeparator();
     auto* manageAct = m_accountsMenu->addAction("Manage Accounts...");
