@@ -26,6 +26,10 @@
   <a href="https://github.com/linhnv2023/GeSoftphone/releases/download/v1.0.0/GESoftphone.dmg">
     <img src="https://img.shields.io/badge/⬇️_Download-GESoftphone.dmg_(macOS)-2563eb?style=for-the-badge&logo=apple&logoColor=white" alt="Download macOS DMG" />
   </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/linhnv2023/GeSoftphone/releases/download/v1.0.0/gesoftphone_1.0.0_amd64.deb">
+    <img src="https://img.shields.io/badge/⬇️_Download-Ubuntu_.deb_(Linux)-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" alt="Download Ubuntu DEB" />
+  </a>
 </p>
 
 ---
@@ -126,16 +130,61 @@ Run the automated packaging script:
 
 ---
 
-### 🐧 2. Linux / Ubuntu Build (.deb Package)
+### 🐧 2. Installation & Build on Ubuntu Desktop (Linux)
 
-#### Option A: Dockerized Isolated Build (Recommended)
-Build a production-ready Ubuntu `.deb` package on any machine with Docker installed:
+#### 📦 A. Install Pre-built `.deb` Package (Recommended for End Users)
+
+GeSoftphone provides an official `.deb` package for Ubuntu 22.04 LTS / 24.04 LTS and Debian-based distributions.
+
+##### 1. Download the Debian Package
+Download the latest `gesoftphone_1.0.0_amd64.deb` from the [GitHub Releases](https://github.com/linhnv2023/GeSoftphone/releases/latest) page, or via terminal:
+```bash
+wget https://github.com/linhnv2023/GeSoftphone/releases/download/v1.0.0/gesoftphone_1.0.0_amd64.deb
+```
+
+##### 2. Install the Package
+
+* **Method 1: Via Terminal with APT (Recommended - Automatically resolves all dependencies)**:
+  ```bash
+  sudo apt update
+  sudo apt install ./gesoftphone_1.0.0_amd64.deb
+  ```
+
+* **Method 2: Via DPKG**:
+  ```bash
+  sudo dpkg -i gesoftphone_1.0.0_amd64.deb
+  sudo apt-get install -f # Fix and install any missing dependencies if needed
+  ```
+
+* **Method 3: Graphical Desktop Installation (GUI)**:
+  1. Open your **Files** manager and go to **Downloads**.
+  2. Right-click on `gesoftphone_1.0.0_amd64.deb` and choose **Open With Software Install** (or double-click).
+  3. Click the green **Install** button and authenticate with your user password.
+
+##### 3. Launching on Ubuntu
+- **From Application Menu**: Press the <kbd>Super</kbd> (Windows) key on your keyboard, type **GeSoftphone**, and click the application icon.
+- **From Terminal**:
+  ```bash
+  gesoftphone
+  ```
+
+##### 4. Uninstalling (if needed)
+```bash
+sudo apt remove gesoftphone
+```
+
+---
+
+#### 🛠️ B. Building from Source on Linux
+
+##### Option 1: Dockerized Isolated Build (Recommended)
+Build a production-ready Ubuntu `.deb` package on any machine with Docker:
 ```bash
 ./packaging/build_ubuntu_docker.sh
 ```
 *The compiled `.deb` package will be saved in `build_linux/`.*
 
-#### Option B: Native Linux Build
+##### Option 2: Native Linux Build
 Install dependencies on Ubuntu 22.04 / 24.04:
 ```bash
 sudo apt update
@@ -145,12 +194,6 @@ sudo apt install -y build-essential cmake qt6-base-dev libpjproject-dev libsqlit
 Compile and package:
 ```bash
 ./packaging/build_linux.sh
-```
-
-Install the package:
-```bash
-sudo dpkg -i build_linux/gesoftphone_3.22.16_amd64.deb
-sudo apt-get install -f # Fix any missing dependencies if needed
 ```
 
 ---
