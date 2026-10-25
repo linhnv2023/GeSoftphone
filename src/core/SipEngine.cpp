@@ -2,6 +2,8 @@
 #include <pjsua-lib/pjsua.h>
 #include <iostream>
 #include <mutex>
+#include <algorithm>
+#include <cctype>
 
 static ISipEngineListener* g_listener = nullptr;
 static std::mutex g_listenerMutex;
